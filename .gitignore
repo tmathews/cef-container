@@ -1,0 +1,5 @@
+build-win64/
+bin/
+
+vendor/cef_win/Debug/cef_sandbox.lib
+vendor/cef_win/Release/cef_sandbox.lib

@@ -1,0 +1,17 @@
+root = true
+
+[CMakeLists.txt]
+indent_style = tab
+indent_size = 4
+
+[*.cmake]
+indent_style = tab
+indent_size = 4
+
+[*.{h,c,cpp}]
+indent_style = tab
+indent_size = 4
+
+[*.{html,js,json}]
+indent_style = space
+indent_size = 2
