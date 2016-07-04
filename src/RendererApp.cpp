@@ -70,6 +70,10 @@ public:
 						strncpy(config.fullscreenKey, val.c_str(), sizeof(config.fullscreenKey));
 					else if (key.compare("initial") == 0)
 						config.fullscreenInitial = ParseBoolString(val);
+					else if (key.compare("altenter") == 0)
+						config.fullscreenAltEnter = ParseBoolString(val);
+					else if (key.compare("f11") == 0)
+						config.fullscreenF11 = ParseBoolString(val);
 				}
 				else if (section.compare("size") == 0)
 				{
@@ -118,7 +122,6 @@ bool RendererApp::OnProcessMessageReceived(
 {
 	if (message->GetName().compare(kMsgIndexLoaded) == 0)
 	{
-		DCHECK_EQ(source_process, PID_BROWSER);
 		CefRefPtr<ConfigVisitor> visitor(new ConfigVisitor(browser));
 		browser->GetMainFrame()->VisitDOM(visitor);
 		return true;

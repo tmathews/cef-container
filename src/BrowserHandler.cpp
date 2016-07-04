@@ -147,6 +147,21 @@ void BrowserHandler::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPt
 		model->Clear();
 }
 
+bool BrowserHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event, CefEventHandle os_event)
+{
+	if (event.type == KEYEVENT_KEYUP)
+	{
+		if ((m_config.fullscreenF11 && event.windows_key_code == VK_F11)
+		 || (m_config.fullscreenAltEnter && event.windows_key_code == VK_RETURN && (event.modifiers & EVENTFLAG_ALT_DOWN)))
+		{
+			auto browserView = CefBrowserView::GetForBrowser(browser);
+			browserView->GetWindow()->SetFullscreen(!browserView->GetWindow()->IsFullscreen());
+		}
+		return true;
+	}
+	return false;
+}
+
 class CloseAllBrowsersTask : public CefTask
 {
 	IMPLEMENT_REFCOUNTING(CloseAllBrowsersTask);
@@ -213,4 +228,3 @@ bool BrowserHandler::OnProcessMessageReceived(
 	}
 	return CefClient::OnProcessMessageReceived(browser, source_process, message);
 }
-

@@ -10,7 +10,8 @@ class BrowserHandler :
 	public CefDisplayHandler,
 	public CefLifeSpanHandler,
 	public CefLoadHandler,
-	public CefContextMenuHandler
+	public CefContextMenuHandler,
+	public CefKeyboardHandler
 {
 	IMPLEMENT_REFCOUNTING(BrowserHandler);
 
@@ -24,6 +25,7 @@ public:
 	virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override { return this; }
 	virtual CefRefPtr<CefLoadHandler> GetLoadHandler() override { return this; }
 	virtual CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override { return this; }
+	virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override { return this; }
 
 	virtual bool OnProcessMessageReceived(
 		CefRefPtr<CefBrowser> browser,
@@ -59,10 +61,11 @@ public:
 		CefRefPtr<CefMenuModel> model
 	) override;
 
+	virtual bool OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event, CefEventHandle os_event) override;
+
 	void CloseAllBrowsers(bool forceClose);
 
 	bool IsClosing() const { return m_isClosing; }
-
 
 private:
 	bool m_isClosing;
