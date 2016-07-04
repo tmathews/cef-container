@@ -2,13 +2,13 @@
 
 #include <include/views/cef_window.h>
 
-class WindowDelegate : public CefWindowDelegate
+class BrowserWindowDelegate : public CefWindowDelegate
 {
-	IMPLEMENT_REFCOUNTING(WindowDelegate);
-	DISALLOW_COPY_AND_ASSIGN(WindowDelegate);
+	IMPLEMENT_REFCOUNTING(BrowserWindowDelegate);
+	DISALLOW_COPY_AND_ASSIGN(BrowserWindowDelegate);
 
 public:
-	explicit WindowDelegate(CefRefPtr<CefBrowserView> browserView);
+	explicit BrowserWindowDelegate(CefRefPtr<CefBrowserView> browserView);
 
 	void OnWindowCreated(CefRefPtr<CefWindow> window) override;
 	void OnWindowDestroyed(CefRefPtr<CefWindow> window) override;

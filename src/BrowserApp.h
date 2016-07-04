@@ -2,14 +2,15 @@
 
 #include <include/cef_app.h>
 
-class App :
+class BrowserApp :
 	public CefApp,
 	public CefBrowserProcessHandler
 {
-	IMPLEMENT_REFCOUNTING(App);
+	IMPLEMENT_REFCOUNTING(BrowserApp);
 
 public:
-	App();
+	BrowserApp();
+
 
 	virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override
 	{
@@ -17,4 +18,7 @@ public:
 	}
 
 	virtual void OnContextInitialized() override;
+
+	virtual void OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar) override;
+
 };
