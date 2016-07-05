@@ -1,10 +1,13 @@
 #include "RendererApp.h"
 #include "Messages.h"
 #include "AppConfig.h"
+#include "Content.h"
 
 inline bool ParseBoolString(const std::string &str)
 {
-	return str.compare("no") != 0 && str.compare("false") != 0 && str.compare("0") != 0;
+	return str.compare("no") != 0
+		&& str.compare("false") != 0
+		&& str.compare("0") != 0;
 }
 
 class ConfigVisitor : public CefDOMVisitor
@@ -114,6 +117,17 @@ private:
 	CefRefPtr<CefBrowser> m_browser;
 };
 
+void RendererApp::OnWebKitInitialized()
+{
+	CefRegisterSchemeHandlerFactory("content", "",
+		CefRefPtr<ContentHandlerFactory>(new ContentHandlerFactory()));
+}
+
+void RendererApp::OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar)
+{
+	registrar->AddCustomScheme("content", true, true, false);
+}
+
 bool RendererApp::OnProcessMessageReceived(
 	CefRefPtr<CefBrowser> browser,
 	CefProcessId source_process,
@@ -126,6 +140,5 @@ bool RendererApp::OnProcessMessageReceived(
 		browser->GetMainFrame()->VisitDOM(visitor);
 		return true;
 	}
-	return false;
+	return CefRenderProcessHandler::OnProcessMessageReceived(browser, source_process, message);
 }
-

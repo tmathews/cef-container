@@ -1,5 +1,6 @@
 #include "BrowserApp.h"
 #include "RendererApp.h"
+#include "Content.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
@@ -50,7 +51,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 	CefSettings settings;
 	settings.no_sandbox = true;
 	settings.remote_debugging_port = 1337;
-	//settings.single_process = true;
+	CefString(&settings.cache_path).FromASCII("./cache/");
 
 	CefInitialize(mainArgs, settings, app, nullptr);
 

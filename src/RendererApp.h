@@ -9,16 +9,15 @@ class RendererApp :
 	IMPLEMENT_REFCOUNTING(RendererApp);
 
 public:
+	virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override { return this; }
+
 	virtual bool OnProcessMessageReceived(
 		CefRefPtr<CefBrowser> browser,
 		CefProcessId source_process, 
 		CefRefPtr<CefProcessMessage> message
 	) override;
 
-	virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override;
-};
+	virtual void OnWebKitInitialized() override;
 
-inline CefRefPtr<CefRenderProcessHandler> RendererApp::GetRenderProcessHandler()
-{
-	return this;
-}
+	virtual void OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar) override;
+};

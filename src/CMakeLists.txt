@@ -10,8 +10,6 @@ set(SRCS
 	BrowserWindowDelegate.cpp
 	RendererApp.h
 	RendererApp.cpp
-	FileUtils.h
-	FileUtils.cpp
 	Messages.h
 	Messages.cpp
 	Content.h

@@ -1,19 +1,22 @@
 #include "Content.h"
-#include "FileUtils.h"
 
 #include <include/cef_parser.h>
+#include <include/wrapper/cef_helpers.h>
 
-static CefRefPtr<ContentHandlerFactory> s_factoryInstance(new ContentHandlerFactory());
-
-ContentResourceHandler::ContentResourceHandler()
-	: m_file(nullptr)
-	, m_totalRead(0)
+ContentResourceHandler::ContentResourceHandler(const std::string &mimeType, FILE *file, int size)
+	: m_mimeType(mimeType)
+	, m_file(file)
+	, m_fileSize(size)
 {
 }
 
 ContentResourceHandler::~ContentResourceHandler()
 {
-	Cancel();
+	if (m_file)
+	{
+		fclose(m_file);
+		m_file = nullptr;
+	}
 }
 
 inline std::string GetFileExtension(const std::string &fileName)
@@ -27,29 +30,7 @@ bool ContentResourceHandler::ProcessRequest(
 	CefRefPtr<CefCallback> callback
 )
 {
-	auto url = request->GetURL();
-
-	CefURLParts urlParts;
-	if (!CefParseURL(request->GetURL(), urlParts))
-		return false;
-
-	CefString path;
-	path.FromString(urlParts.path.str, urlParts.path.length, true);
-
-	auto ext = GetFileExtension(path.ToString());
-
-	m_mimeType = CefGetMimeType(ext);
-
-	auto fileName = std::string("./content/") + path.ToString();
-
-	m_file = fopen(fileName.c_str(), "rb");
-
-	if (!m_file)
-		return false;
-
-	fseek(m_file, 0, SEEK_END);
-	m_fileSize = ftell(m_file);
-	fseek(m_file, 0, SEEK_SET);
+	CEF_REQUIRE_IO_THREAD();
 
 	callback->Continue();
 
@@ -62,8 +43,14 @@ void ContentResourceHandler::GetResponseHeaders(
 	CefString& redirectUrl
 )
 {
-	response->SetMimeType(m_mimeType);
+	CEF_REQUIRE_IO_THREAD();
+
+	if (!m_mimeType.empty())
+		response->SetMimeType(m_mimeType);
+
 	response->SetStatus(200);
+	response->SetStatusText("OK");
+
 	response_length = m_fileSize;
 }
 
@@ -74,23 +61,25 @@ bool ContentResourceHandler::ReadResponse(
 	CefRefPtr<CefCallback> callback
 )
 {
+	CEF_REQUIRE_IO_THREAD();
+
+	if (feof(m_file))
+		return false;
+
 	bytes_read = (int)fread(data_out, 1, bytes_to_read, m_file);
-	m_totalRead += bytes_read;
+
 	return true;
 }
 
 void ContentResourceHandler::Cancel()
 {
+	CEF_REQUIRE_IO_THREAD();
+
 	if (m_file)
 	{
 		fclose(m_file);
 		m_file = nullptr;
 	}
-}
-
-CefRefPtr<ContentHandlerFactory> ContentHandlerFactory::Get()
-{
-	return s_factoryInstance;
 }
 
 CefRefPtr<CefResourceHandler> ContentHandlerFactory::Create(
@@ -100,5 +89,56 @@ CefRefPtr<CefResourceHandler> ContentHandlerFactory::Create(
 	CefRefPtr<CefRequest> request
 )
 {
-	return new ContentResourceHandler();
+	CEF_REQUIRE_IO_THREAD();
+
+	auto url = request->GetURL();
+
+	CefURLParts urlParts;
+	if (!CefParseURL(request->GetURL(), urlParts))
+		return false;
+
+	CefString pathTmp;
+	pathTmp.FromString(urlParts.path.str, urlParts.path.length, true);
+	pathTmp = CefURIDecode(pathTmp, true, (cef_uri_unescape_rule_t)(UU_NORMAL | UU_SPACES));
+
+	if (pathTmp.empty())
+		return false;
+
+	std::string path = pathTmp.ToString();
+
+	pathTmp.ClearAndFree();
+
+	if (path.back() == '/' || path.back() == '\\')
+		path = path + "index.html";
+
+	auto ext = GetFileExtension(path);
+
+	auto mimeType = CefGetMimeType(ext);
+
+	if (mimeType.empty())
+	{
+		if (ext.compare("json") == 0)
+			mimeType = "text/javascript";
+		else if (ext.compare("ts") == 0)
+			mimeType = "text/x.typescript";
+	}
+
+	auto fileName = std::string("./content") + path;
+
+	auto file = fopen(fileName.c_str(), "rb");
+
+	if (!file)
+		return nullptr;
+
+	fseek(file, 0, SEEK_END);
+	auto fileSize = ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+	if (fileSize == 0)
+	{
+		fclose(file);
+		return nullptr;
+	}
+
+	return new ContentResourceHandler(mimeType, file, fileSize);
 }

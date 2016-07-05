@@ -11,11 +11,7 @@ class BrowserApp :
 public:
 	BrowserApp();
 
-
-	virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override
-	{
-		return this;
-	}
+	virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override { return this; }
 
 	virtual void OnContextInitialized() override;
 

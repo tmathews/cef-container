@@ -9,7 +9,7 @@ class ContentResourceHandler : public CefResourceHandler
 	DISALLOW_COPY_AND_ASSIGN(ContentResourceHandler);
 
 public:
-	ContentResourceHandler();
+	ContentResourceHandler(const std::string &mimeType, FILE *file, int size);
 	~ContentResourceHandler();
 
 	virtual bool ProcessRequest(
@@ -33,10 +33,9 @@ public:
 	virtual void Cancel() override;
 
 private:
-	FILE *m_file;
-	int64 m_fileSize;
-	int64 m_totalRead;
 	CefString m_mimeType;
+	FILE *m_file;
+	int m_fileSize;
 };
 
 class ContentHandlerFactory : public CefSchemeHandlerFactory
@@ -44,8 +43,6 @@ class ContentHandlerFactory : public CefSchemeHandlerFactory
 	IMPLEMENT_REFCOUNTING(ContentHandlerFactory);
 
 public:
-	static CefRefPtr<ContentHandlerFactory> Get();
-
 	virtual CefRefPtr<CefResourceHandler> Create(
 		CefRefPtr<CefBrowser> browser,
 		CefRefPtr<CefFrame> frame,

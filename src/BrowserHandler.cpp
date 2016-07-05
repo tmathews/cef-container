@@ -1,6 +1,5 @@
 #include "BrowserHandler.h"
 #include "Messages.h"
-#include "FileUtils.h"
 #include "AppConfig.h"
 #include "PlatformUtils.h"
 
@@ -9,6 +8,7 @@
 #include <include/views/cef_browser_view.h>
 #include <include/views/cef_window.h>
 #include <include/cef_app.h>
+#include <include/cef_parser.h>
 
 static BrowserHandler *s_instance;
 
@@ -131,12 +131,30 @@ void BrowserHandler::OnLoadError(
 	if (errorCode == ERR_ABORTED)
 		return;
 
-	return frame->LoadString("<html>Something bad happened</html>", failedUrl);
+	std::stringstream ss;
+	ss << "<html><body>"
+		"Failed to load URL " << std::string(failedUrl) <<
+		" with error " << std::string(errorText) << " (" << errorCode <<
+		").</body></html>";
+	return frame->LoadString(ss.str(), failedUrl);
 };
 
 void BrowserHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
 {
-	browser->SendProcessMessage(PID_RENDERER, CefProcessMessage::Create(kMsgIndexLoaded));
+	CEF_REQUIRE_UI_THREAD();
+
+	CefURLParts urlParts;
+	if (CefParseURL(frame->GetURL(), urlParts))
+	{
+		CefString path;
+		path.FromString(urlParts.path.str, urlParts.path.length, true);
+		if (path.compare("/") == 0)
+		{
+			browser->SendProcessMessage(PID_RENDERER, CefProcessMessage::Create(kMsgIndexLoaded));
+		}
+	}
+
+	CefLoadHandler::OnLoadEnd(browser, frame, httpStatusCode);
 }
 
 void BrowserHandler::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model)
@@ -151,13 +169,16 @@ bool BrowserHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent
 {
 	if (event.type == KEYEVENT_KEYUP)
 	{
-		if ((m_config.fullscreenF11 && event.windows_key_code == VK_F11)
-		 || (m_config.fullscreenAltEnter && event.windows_key_code == VK_RETURN && (event.modifiers & EVENTFLAG_ALT_DOWN)))
+		if (m_config.fullscreenEnabled)
 		{
-			auto browserView = CefBrowserView::GetForBrowser(browser);
-			browserView->GetWindow()->SetFullscreen(!browserView->GetWindow()->IsFullscreen());
+			if ((m_config.fullscreenF11 && event.windows_key_code == VK_F11)
+				|| (m_config.fullscreenAltEnter && event.windows_key_code == VK_RETURN && (event.modifiers & EVENTFLAG_ALT_DOWN)))
+			{
+				auto browserView = CefBrowserView::GetForBrowser(browser);
+				browserView->GetWindow()->SetFullscreen(!browserView->GetWindow()->IsFullscreen());
+				return true;
+			}
 		}
-		return true;
 	}
 	return false;
 }
