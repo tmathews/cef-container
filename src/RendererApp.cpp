@@ -65,7 +65,12 @@ public:
 				auto key = itemprop.substr(cpos2 + 1);
 				auto val = child->GetElementAttribute("content").ToString();
 
-				if (section.compare("fullscreen") == 0)
+				if (section.compare("window") == 0)
+				{
+					if (key.compare("icon") == 0)
+						strncpy(config.iconPath, val.c_str(), sizeof(config.iconPath));
+				}
+				else if (section.compare("fullscreen") == 0)
 				{
 					if (key.compare("enabled") == 0)
 						config.fullscreenEnabled = ParseBoolString(val);
@@ -104,6 +109,11 @@ public:
 				{
 					if (key.compare("enabled") == 0)
 						config.contextmenuEnabled = ParseBoolString(val);
+				}
+				else if (section.compare("exit") == 0)
+				{
+					if (key.compare("esc") == 0)
+						config.exitEsc = ParseBoolString(val);
 				}
 			}
 		}

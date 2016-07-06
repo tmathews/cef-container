@@ -34,7 +34,6 @@ public:
 	) override;
 
 	virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString &title) override;
-	virtual void OnFaviconURLChange(CefRefPtr<CefBrowser> browser, const std::vector<CefString>& icon_urls) override;
 
 	virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) override;
 	virtual bool DoClose(CefRefPtr<CefBrowser> browser) override;

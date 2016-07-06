@@ -42,12 +42,12 @@ void BrowserHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefStrin
 	}
 }
 
-class FaviconDownloadCallback : public CefDownloadImageCallback
+class IconDownloadcallback : public CefDownloadImageCallback
 {
-	IMPLEMENT_REFCOUNTING(FaviconDownloadCallback);
+	IMPLEMENT_REFCOUNTING(IconDownloadcallback);
 
 public:
-	FaviconDownloadCallback(CefRefPtr<CefBrowser> browser)
+	IconDownloadcallback(CefRefPtr<CefBrowser> browser)
 		: m_browser(browser)
 	{
 	}
@@ -74,18 +74,6 @@ public:
 private:
 	CefRefPtr<CefBrowser> m_browser;
 };
-
-void BrowserHandler::OnFaviconURLChange(CefRefPtr<CefBrowser> browser, const std::vector<CefString>& icon_urls)
-{
-	CEF_REQUIRE_UI_THREAD();
-
-	if (!icon_urls.empty())
-	{
-		browser
-			->GetHost()
-			->DownloadImage(icon_urls[0], true, 16, false, new FaviconDownloadCallback(browser));
-	}
-}
 
 void BrowserHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {
@@ -143,16 +131,7 @@ void BrowserHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame
 {
 	CEF_REQUIRE_UI_THREAD();
 
-	CefURLParts urlParts;
-	if (CefParseURL(frame->GetURL(), urlParts))
-	{
-		CefString path;
-		path.FromString(urlParts.path.str, urlParts.path.length, true);
-		if (path.compare("/") == 0)
-		{
 			browser->SendProcessMessage(PID_RENDERER, CefProcessMessage::Create(kMsgIndexLoaded));
-		}
-	}
 
 	CefLoadHandler::OnLoadEnd(browser, frame, httpStatusCode);
 }
@@ -178,6 +157,12 @@ bool BrowserHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent
 				browserView->GetWindow()->SetFullscreen(!browserView->GetWindow()->IsFullscreen());
 				return true;
 			}
+		}
+
+		if (m_config.exitEsc && event.windows_key_code == VK_ESCAPE)
+		{
+			CloseAllBrowsers(false);
+			return true;
 		}
 	}
 	return false;
@@ -238,10 +223,32 @@ bool BrowserHandler::OnProcessMessageReceived(
 			if (got == sizeof(m_config))
 			{
 				browserWindow->SetFullscreen(m_config.fullscreenInitial);
-				browserWindow->SetSize(CefSize(m_config.sizeWidth, m_config.sizeHeight));
+				PlatformUtils::AdjustWindowSize(browserWindow, m_config.sizeWidth, m_config.sizeHeight);
 				PlatformUtils::MakeWindowResizable(browserWindow, m_config.resizeEnabled);
 				PlatformUtils::MakeWindowMaximizable(browserWindow, m_config.maximizeEnabled);
 				PlatformUtils::MakeWindowMinimizable(browserWindow, m_config.minimizeEnabled);
+
+				if (m_config.iconPath[0] != 0)
+				{
+					char iconUrl[128];
+
+					CefURLParts urlParts;
+					CefParseURL(m_config.iconPath, urlParts);
+
+					if (urlParts.scheme.length == 0)
+					{
+						strcpy(iconUrl, "content://./");
+						strcat(iconUrl, m_config.iconPath);
+					}
+					else
+					{
+						strncpy(iconUrl, m_config.iconPath, sizeof(iconUrl));
+					}
+
+					browser
+						->GetHost()
+						->DownloadImage(iconUrl, true, 16, true, new IconDownloadcallback(browser));
+				}
 			}
 		}
 

@@ -32,7 +32,7 @@ void BrowserApp::OnContextInitialized()
 	CefRefPtr<CefBrowserView> browserView =
 		CefBrowserView::CreateBrowserView(
 			handler,
-			"content://index.html",
+			"content:///index.html",
 			settings,
 			nullptr,
 			nullptr

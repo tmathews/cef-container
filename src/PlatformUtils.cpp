@@ -38,3 +38,23 @@ void PlatformUtils::MakeWindowMinimizable(CefRefPtr<CefWindow> window, bool mini
 	UpdateWindowStyle(window, WS_MINIMIZEBOX, minimizable);
 #endif
 }
+
+void PlatformUtils::AdjustWindowSize(CefRefPtr<CefWindow> window, int contentWidth, int contentHeight)
+{
+#ifdef _WIN32
+	RECT rc;
+	rc.left = 0;
+	rc.top = 0;
+	rc.right = contentWidth;
+	rc.bottom = contentHeight;
+
+	auto hWnd = window->GetWindowHandle();
+	auto style = GetWindowLong(hWnd, GWL_STYLE);
+
+	AdjustWindowRect(&rc, style, FALSE);
+
+	window->SetSize(CefSize(rc.right - rc.left, rc.bottom - rc.top));
+#else
+	window->SetSize(contentWidth, contentHeight);
+#endif
+}

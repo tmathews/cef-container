@@ -10,4 +10,6 @@ public:
 	static void MakeWindowMaximizable(CefRefPtr<CefWindow> window, bool maximizable = true);
 
 	static void MakeWindowMinimizable(CefRefPtr<CefWindow> window, bool minimizable = true);
+
+	static void AdjustWindowSize(CefRefPtr<CefWindow> window, int contentWidth, int contentHeight);
 };
