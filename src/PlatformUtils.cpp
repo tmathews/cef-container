@@ -48,7 +48,6 @@ void PlatformUtils::MakeWindowResizable(CefRefPtr<CefWindow> window, bool resiza
 	}
 	XSetWMNormalHints(cef_get_xdisplay(), window->GetWindowHandle(), hints);
 	XFree(hints);
-	printf("resizable: %s\n", resizable?"yes":"no");
 #endif
 }
 
