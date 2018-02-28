@@ -162,8 +162,13 @@ bool BrowserHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent
 	{
 		if (m_config.fullscreenEnabled)
 		{
+#ifdef _WIN32
 			if ((m_config.fullscreenF11 && event.windows_key_code == VK_F11)
 				|| (m_config.fullscreenAltEnter && event.windows_key_code == VK_RETURN && (event.modifiers & EVENTFLAG_ALT_DOWN)))
+#else
+			// TODO: Handle linux case.
+			if (false)
+#endif
 			{
 				auto browserView = CefBrowserView::GetForBrowser(browser);
 				browserView->GetWindow()->SetFullscreen(!browserView->GetWindow()->IsFullscreen());
@@ -171,7 +176,11 @@ bool BrowserHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent
 			}
 		}
 
+#ifdef _WIN32
 		if (m_config.exitEsc && event.windows_key_code == VK_ESCAPE)
+#else
+		// TODO: Handle linux case.
+#endif
 		{
 			CloseAllBrowsers(false);
 			return true;

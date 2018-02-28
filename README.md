@@ -4,6 +4,7 @@
 
 - [CMake](https://cmake.org/download/)
 - [CEF](http://opensource.spotify.com/cefbuilds/index.html)
+- On Linux: X11 development libraries (Ubuntu: install `libx11-dev`)
 
 ## Build instructions
 

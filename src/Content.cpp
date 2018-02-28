@@ -83,7 +83,7 @@ CefRefPtr<CefResourceHandler> ContentHandlerFactory::Create(CefRefPtr<CefBrowser
 	CefURLParts urlParts;
 	if (!CefParseURL(request->GetURL(), urlParts))
 	{
-		return false;
+		return nullptr;
 	}
 
 	CefString pathTmp;
@@ -92,7 +92,7 @@ CefRefPtr<CefResourceHandler> ContentHandlerFactory::Create(CefRefPtr<CefBrowser
 
 	if (pathTmp.empty())
 	{
-		return false;
+		return nullptr;
 	}
 
 	std::string path = pathTmp.ToString();

@@ -55,6 +55,6 @@ void PlatformUtils::AdjustWindowSize(CefRefPtr<CefWindow> window, int contentWid
 
 	window->SetSize(CefSize(rc.right - rc.left, rc.bottom - rc.top));
 #else
-	window->SetSize(contentWidth, contentHeight);
+	window->SetSize(CefSize(contentWidth, contentHeight));
 #endif
 }

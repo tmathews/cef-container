@@ -9,6 +9,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 find_package(CEF REQUIRED)
 add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
+if(UNIX)
+	find_package(X11 REQUIRED)
+endif()
+
 add_library(RapidJSON INTERFACE)
 target_include_directories(RapidJSON INTERFACE ${CMAKE_SOURCE_DIR}/vendor/rapidjson/include)
 
