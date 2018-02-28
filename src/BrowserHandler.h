@@ -19,7 +19,7 @@ public:
 	BrowserHandler();
 	~BrowserHandler();
 
-	static BrowserHandler *Get();
+	static BrowserHandler* Get();
 
 	virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() override { return this; }
 	virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override { return this; }
@@ -27,38 +27,18 @@ public:
 	virtual CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override { return this; }
 	virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override { return this; }
 
-	virtual bool OnProcessMessageReceived(
-		CefRefPtr<CefBrowser> browser,
-		CefProcessId source_process,
-		CefRefPtr<CefProcessMessage> message
-	) override;
+	virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message) override;
 
-	virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString &title) override;
+	virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title) override;
 
 	virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) override;
 	virtual bool DoClose(CefRefPtr<CefBrowser> browser) override;
 	virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) override;
 
-	virtual void OnLoadError(
-		CefRefPtr<CefBrowser> browser,
-		CefRefPtr<CefFrame> frame,
-		ErrorCode errorCode,
-		const CefString &errorText,
-		const CefString &failedUrl
-	) override;
+	virtual void OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString& errorText, const CefString& failedUrl) override;
+	virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode) override;
 
-	virtual void OnLoadEnd(
-		CefRefPtr<CefBrowser> browser,
-		CefRefPtr<CefFrame> frame,
-		int httpStatusCode
-	) override;
-
-	virtual void OnBeforeContextMenu(
-		CefRefPtr<CefBrowser> browser,
-		CefRefPtr<CefFrame> frame,
-		CefRefPtr<CefContextMenuParams> params,
-		CefRefPtr<CefMenuModel> model
-	) override;
+	virtual void OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model) override;
 
 	virtual bool OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event, CefEventHandle os_event) override;
 

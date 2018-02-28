@@ -1,15 +1,16 @@
-set(TARGET_NAME cef-container)
+set(CEF_TARGET cef-container)
+
+ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
+
+SET_CEF_TARGET_OUT_DIR()
 
 set(SRCS
-	WinMain.cpp
-	BrowserApp.h
-	BrowserApp.cpp
+	App.h
+	App.cpp
 	BrowserHandler.h
 	BrowserHandler.cpp
 	BrowserWindowDelegate.h
 	BrowserWindowDelegate.cpp
-	RendererApp.h
-	RendererApp.cpp
 	Messages.h
 	Messages.cpp
 	Content.h
@@ -19,20 +20,29 @@ set(SRCS
 	PlatformUtils.cpp
 	)
 
-add_executable(${TARGET_NAME} WIN32 MACOSX_BUNDLE ${SRCS})
+if(WIN32)
+	set(SRCS ${SRCS} WinMain.cpp)
+endif()
+
+add_executable(${CEF_TARGET} WIN32 MACOSX_BUNDLE ${SRCS})
+
+target_link_libraries(${CEF_TARGET} RapidJSON)
 
 # Link the CEF import library and the DLL wrapper
-target_link_libraries(${TARGET_NAME} ${CEF_LIB_RELEASE})
-target_link_libraries(${TARGET_NAME} libcef_dll_wrapper)
+add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
+SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_TARGET})
+target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
 
 # Copy CEF resources
 if(WIN32)
-	COPY_FILES("${TARGET_NAME}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR_RELEASE}" "$<TARGET_FILE_DIR:${TARGET_NAME}>")
-	COPY_FILES("${TARGET_NAME}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "$<TARGET_FILE_DIR:${TARGET_NAME}>")
+	ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET}" "exe")
+
+	COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
+	COPY_FILES("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
 endif()
 
 # Copy content
 add_custom_command(
-	TARGET ${TARGET_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/content $<TARGET_FILE_DIR:${TARGET_NAME}>/content
+	TARGET ${CEF_TARGET} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/content $<TARGET_FILE_DIR:${CEF_TARGET}>/content
 	)

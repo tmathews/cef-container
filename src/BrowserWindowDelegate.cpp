@@ -22,9 +22,11 @@ void BrowserWindowDelegate::OnWindowDestroyed(CefRefPtr<CefWindow> window)
 
 bool BrowserWindowDelegate::CanClose(CefRefPtr<CefWindow> window)
 {
-	CefRefPtr<CefBrowser> browser = m_browserView->GetBrowser();
+	auto browser = m_browserView->GetBrowser();
 	if (browser)
+	{
 		browser->GetHost()->TryCloseBrowser();
+	}
 	return true;
 }
 

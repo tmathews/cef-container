@@ -1,23 +1,21 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8.1)
+
 project(cef-container)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(VENDOR_DIR ${CMAKE_SOURCE_DIR}/vendor)
-set(BIN_DIR ${CMAKE_SOURCE_DIR}/bin)
+find_package(CEF REQUIRED)
+add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
-#----------------------------------------------------------------------------
-# CEF setup, this is basically the same as what's in the CMakeLists.txt in
-# the vendor/cef folder.
-#----------------------------------------------------------------------------
-if(MSVC)
-	set(CEF_ROOT ${VENDOR_DIR}/cef_win)
-	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
-	find_package(CEF REQUIRED)
-	add_subdirectory(${CEF_ROOT}/libcef_dll ${BIN_DIR}/libcef_dll_wrapper)
-	add_library(libcef INTERFACE)
-	target_include_directories(libcef INTERFACE ${CEF_ROOT})
-	PRINT_CEF_CONFIG()
+add_library(RapidJSON INTERFACE)
+target_include_directories(RapidJSON INTERFACE ${CMAKE_SOURCE_DIR}/vendor/rapidjson/include)
+
+add_subdirectory(src ${CMAKE_SOURCE_DIR}/bin/cef-container)
+
+# Visual Studio IDE configuration
+if(MSVC_IDE)
+	set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cef-container)
+	set_property(TARGET cef-container PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
 endif()
-
-add_subdirectory(src ${BIN_DIR}/cef-container)

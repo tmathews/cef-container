@@ -1,17 +1,39 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>My App Title</title>
-  <meta itemprop="app:window:icon" content="icon.png"/>
-  <meta itemprop="app:fullscreen:enabled" content="yes"/>
-  <meta itemprop="app:fullscreen:initial" content="no"/>
-  <meta itemprop="app:fullscreen:f11" content="yes"/>
-  <meta itemprop="app:fullscreen:altenter" content="yes"/>
-  <meta itemprop="app:size:width" content="800"/>
-  <meta itemprop="app:size:height" content="600"/>
-  <meta itemprop="app:resize:enabled" content="yes"/>
-  <meta itemprop="app:contextmenu:enabled" content="no"/>
-  <meta itemprop="app:exit:esc" content="no"/>
-</head>
-<body>Sample</body>
+
+  <head>
+    
+    <meta charset="utf-8">
+
+    <title>My App Title</title>
+
+    <script id="config" type="application/json">
+    {
+      "window": {
+        "icon": "icon.png",
+        "width": 800,
+        "height": 600,
+        "resizable": true
+      },
+      "fullscreen": {
+        "enabled": true,
+        "initial": false,
+        "f11": true,
+        "altEnter": true
+      },
+      "contextMenu": {
+        "enabled": false
+      },
+      "exit": {
+        "esc": false
+      }
+    }
+    </script>
+
+  </head>
+
+  <body>
+    Sample
+  </body>
+
 </html>
