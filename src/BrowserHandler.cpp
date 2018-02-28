@@ -238,8 +238,7 @@ bool BrowserHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, Cef
 			browserWindow->SetFullscreen(m_config.fullscreenInitial);
 			PlatformUtils::AdjustWindowSize(browserWindow, m_config.sizeWidth, m_config.sizeHeight);
 			PlatformUtils::MakeWindowResizable(browserWindow, m_config.resizeEnabled);
-			PlatformUtils::MakeWindowMaximizable(browserWindow, m_config.maximizeEnabled);
-			PlatformUtils::MakeWindowMinimizable(browserWindow, m_config.minimizeEnabled);
+			PlatformUtils::SetWindowAllowedActions(browserWindow, m_config.maximizeEnabled, m_config.minimizeEnabled);
 
 			if (m_config.iconPath[0] != 0)
 			{

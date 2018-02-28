@@ -24,3 +24,10 @@ cmake ../ -A x64
 mkdir build && cd build
 cmake ../
 ```
+
+Or use the scripts:
+```sh
+cd scripts
+./build-linux.sh
+./run-linux.sh
+```
