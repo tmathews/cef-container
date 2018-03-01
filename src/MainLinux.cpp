@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 	CefMainArgs mainArgs(argc, argv);
 
 	auto cmdLine = CefCommandLine::CreateCommandLine();
-	cmdLine->InitFromString(::GetCommandLineW());
+	cmdLine->InitFromArgv(argc, argv);
 
 	std::string configPath = cmdLine->GetSwitchValue("config").ToString();
 	if (configPath.empty())

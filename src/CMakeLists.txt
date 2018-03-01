@@ -36,7 +36,7 @@ if(OS_WINDOWS)
 		)
 elseif(OS_LINUX)
 	set(SRCS ${SRCS}
-		MainWindows.cpp
+		MainLinux.cpp
 		platform/PlatformUtilsLinux.cpp
 		content/io/LinuxArchive.h
 		)

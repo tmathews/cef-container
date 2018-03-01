@@ -1,10 +1,10 @@
 #pragma once
 
+#include "io/Archive.h"
+
 #include <include/cef_scheme.h>
 
 #include <vector>
-
-class IArchive;
 
 class ContentHandlerFactory : public CefSchemeHandlerFactory
 {

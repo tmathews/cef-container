@@ -1,8 +1,9 @@
 #pragma once
 
+#include "content/ContentHandlerFactory.h"
+
 #include <include/cef_app.h>
 
-class ContentHandlerFactory;
 struct AppConfig;
 
 class App : public CefApp, public CefBrowserProcessHandler, public CefRenderProcessHandler

@@ -2,7 +2,6 @@
 #include "BrowserHandler.h"
 #include "BrowserWindowDelegate.h"
 
-#include "content/ContentHandlerFactory.h"
 #ifdef _WIN32
 #include "content/io/WindowsArchive.h"
 #else
