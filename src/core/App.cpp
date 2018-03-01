@@ -1,25 +1,43 @@
 #include "App.h"
 #include "BrowserHandler.h"
 #include "BrowserWindowDelegate.h"
-#include "Messages.h"
-#include "ConfigVisitor.h"
 
 #include "content/ContentHandlerFactory.h"
+#ifdef _WIN32
+#include "content/io/WindowsArchive.h"
+#else
+#include "content/io/LinuxArchive.h"
+#endif
 
 #include <include/wrapper/cef_helpers.h>
 #include <include/views/cef_browser_view.h>
 
-App::App()
+static inline IArchive* NewPlatformArchive(const std::string& basePath)
 {
+#ifdef _WIN32
+	return WindowsArchive::New(basePath);
+#else
+	return LinuxArchive::New(basePath);
+#endif
+}
+
+App::App(const AppConfig& config)
+	: m_config(config)
+	, m_contentHandlerFactory(new ContentHandlerFactory())
+{
+	for (const auto& archivePath : m_config.archives)
+	{
+		m_contentHandlerFactory->MountArchive(NewPlatformArchive(archivePath));
+	}
 }
 
 void App::OnContextInitialized()
 {
 	CEF_REQUIRE_UI_THREAD();
 
-	CefRegisterSchemeHandlerFactory("content", "", new ContentHandlerFactory());
+	CefRegisterSchemeHandlerFactory("content", "", m_contentHandlerFactory);
 
-	CefRefPtr<BrowserHandler> handler(new BrowserHandler());
+	CefRefPtr<BrowserHandler> handler(new BrowserHandler(m_config));
 
 	CefBrowserSettings settings;
 	settings.web_security = STATE_DISABLED;
@@ -29,7 +47,7 @@ void App::OnContextInitialized()
 	settings.plugins = STATE_ENABLED;
 	settings.file_access_from_file_urls = STATE_ENABLED;
 	settings.universal_access_from_file_urls = STATE_ENABLED;
-	settings.local_storage = STATE_DISABLED;
+	settings.local_storage = STATE_ENABLED;
 
 	auto browserView = CefBrowserView::CreateBrowserView(
 		handler,
@@ -46,15 +64,3 @@ void App::OnRegisterCustomSchemes(CefRawPtr<CefSchemeRegistrar> registrar)
 {
 	registrar->AddCustomScheme("content", true, false, false, false, false, false);
 }
-
-bool App::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message)
-{
-	if (message->GetName().compare(kMessageVisitIndex) == 0)
-	{
-		CefRefPtr<ConfigVisitor> visitor(new ConfigVisitor(browser));
-		browser->GetMainFrame()->VisitDOM(visitor);
-		return true;
-	}
-	return CefRenderProcessHandler::OnProcessMessageReceived(browser, source_process, message);
-}
-

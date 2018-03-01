@@ -16,7 +16,7 @@ class BrowserHandler :
 	IMPLEMENT_REFCOUNTING(BrowserHandler);
 
 public:
-	BrowserHandler();
+	explicit BrowserHandler(const AppConfig& config);
 	
 	~BrowserHandler();
 
@@ -31,8 +31,6 @@ public:
 	virtual CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override { return this; }
 
 	virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override { return this; }
-
-	virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message) override;
 
 	virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title) override;
 
@@ -55,8 +53,8 @@ public:
 	bool IsClosing() const { return m_isClosing; }
 
 private:
+	const AppConfig& m_config;
 	bool m_isClosing;
 	std::vector<CefRefPtr<CefBrowser>> m_browsers;
-	AppConfig m_config;
 };
 

@@ -1,0 +1,25 @@
+{
+  "window": {
+    "icon": "icon.png",
+    "width": 800,
+    "height": 600,
+    "resizable": true
+  },
+  "fullscreen": {
+    "enabled": true,
+    "initial": false,
+    "f11": true,
+    "altEnter": true
+  },
+  "contextMenu": {
+    "enabled": false
+  },
+  "exit": {
+    "esc": false
+  },
+  "content": {
+    "archives": [
+      "./content/"
+    ]
+  }
+}

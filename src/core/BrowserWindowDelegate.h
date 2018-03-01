@@ -11,7 +11,9 @@ public:
 	explicit BrowserWindowDelegate(CefRefPtr<CefBrowserView> browserView);
 
 	void OnWindowCreated(CefRefPtr<CefWindow> window) override;
+
 	void OnWindowDestroyed(CefRefPtr<CefWindow> window) override;
+
 	bool CanClose(CefRefPtr<CefWindow> window) override;
 
 private:

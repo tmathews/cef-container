@@ -1,9 +1,11 @@
 #include "ContentResourceHandler.h"
 
+#include "io/FileStream.h"
+
 #include <include/cef_parser.h>
 #include <include/wrapper/cef_helpers.h>
 
-ContentResourceHandler::ContentResourceHandler(const std::string& mimeType, FILE* file, int size)
+ContentResourceHandler::ContentResourceHandler(const std::string& mimeType, IFileStream* file, int size)
 	: m_mimeType(mimeType)
 	, m_file(file)
 	, m_fileSize(size)
@@ -14,7 +16,7 @@ ContentResourceHandler::~ContentResourceHandler()
 {
 	if (m_file)
 	{
-		fclose(m_file);
+		m_file->Close();
 		m_file = nullptr;
 	}
 }
@@ -47,12 +49,12 @@ bool ContentResourceHandler::ReadResponse(void* data_out, int bytes_to_read, int
 {
 	CEF_REQUIRE_IO_THREAD();
 
-	if (feof(m_file))
+	if (m_file->IsEndOfFile())
 	{
 		return false;
 	}
 
-	bytes_read = (int)fread(data_out, 1, bytes_to_read, m_file);
+	bytes_read = m_file->Read(data_out, bytes_to_read);
 
 	return true;
 }
@@ -63,7 +65,7 @@ void ContentResourceHandler::Cancel()
 
 	if (m_file)
 	{
-		fclose(m_file);
+		m_file->Close();
 		m_file = nullptr;
 	}
 }

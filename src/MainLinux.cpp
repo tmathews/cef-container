@@ -1,5 +1,5 @@
-#include "App.h"
-#include "Content.h"
+#include "core/App.h"
+#include "core/AppConfig.h"
 
 static const char* CACHE_PATH = "./cache";
 
@@ -9,7 +9,22 @@ int main(int argc, char* argv[])
 
 	CefMainArgs mainArgs(argc, argv);
 
-	CefRefPtr<CefApp> app = new App();
+	auto cmdLine = CefCommandLine::CreateCommandLine();
+	cmdLine->InitFromString(::GetCommandLineW());
+
+	std::string configPath = cmdLine->GetSwitchValue("config").ToString();
+	if (configPath.empty())
+	{
+		configPath = "config.default.json";
+	}
+
+	AppConfig config;
+	if (!LoadAppConfig(configPath.c_str(), &config))
+	{
+		return -1;
+	}
+
+	CefRefPtr<CefApp> app(new App(config));
 
 	int exitCode = CefExecuteProcess(mainArgs, app, nullptr);
 	if (exitCode >= 0)

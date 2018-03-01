@@ -1,6 +1,6 @@
 #include "BrowserHandler.h"
-#include "Messages.h"
 #include "AppConfig.h"
+#include "IconDownloadCallback.h"
 
 #include "platform/PlatformUtils.h"
 
@@ -18,7 +18,8 @@ BrowserHandler* BrowserHandler::Get()
 	return s_instance;
 }
 
-BrowserHandler::BrowserHandler()
+BrowserHandler::BrowserHandler(const AppConfig& config)
+	: m_config(config)
 {
 	s_instance = this;
 }
@@ -42,41 +43,6 @@ void BrowserHandler::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefStrin
 		}
 	}
 }
-
-class IconDownloadCallback : public CefDownloadImageCallback
-{
-	IMPLEMENT_REFCOUNTING(IconDownloadCallback);
-
-public:
-	IconDownloadCallback(CefRefPtr<CefBrowser> browser)
-		: m_browser(browser)
-	{
-	}
-
-	virtual void OnDownloadImageFinished(const CefString &image_url, int http_status_code, CefRefPtr<CefImage> image) override
-	{
-		if (!image)
-		{
-			return;
-		}
-
-		CEF_REQUIRE_UI_THREAD();
-
-		auto browserView = CefBrowserView::GetForBrowser(m_browser);
-		if (browserView)
-		{
-			auto window = browserView->GetWindow();
-			if (window)
-			{
-				window->SetWindowIcon(image);
-				window->SetWindowAppIcon(image);
-			}
-		}
-	}
-
-private:
-	CefRefPtr<CefBrowser> m_browser;
-};
 
 void BrowserHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {
@@ -142,7 +108,33 @@ void BrowserHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame
 {
 	CEF_REQUIRE_UI_THREAD();
 
-	browser->SendProcessMessage(PID_RENDERER, CefProcessMessage::Create(kMessageVisitIndex));
+	auto browserView = CefBrowserView::GetForBrowser(browser);
+	auto browserWindow = browserView->GetWindow();
+
+	browserWindow->SetFullscreen(m_config.fullscreenInitial);
+	PlatformUtils::AdjustWindowSize(browserWindow, m_config.sizeWidth, m_config.sizeHeight);
+	PlatformUtils::MakeWindowResizable(browserWindow, m_config.resizeEnabled);
+	PlatformUtils::SetWindowAllowedActions(browserWindow, m_config.maximizeEnabled, m_config.minimizeEnabled);
+
+	if (m_config.iconPath[0] != 0)
+	{
+		char iconUrl[128];
+
+		CefURLParts urlParts;
+		CefParseURL(m_config.iconPath, urlParts);
+
+		if (urlParts.scheme.length == 0)
+		{
+			strcpy(iconUrl, "content://./");
+			strcat(iconUrl, m_config.iconPath);
+		}
+		else
+		{
+			strncpy(iconUrl, m_config.iconPath, sizeof(iconUrl));
+		}
+
+		browser->GetHost()->DownloadImage(iconUrl, true, 16, true, new IconDownloadCallback(browser));
+	}
 
 	CefLoadHandler::OnLoadEnd(browser, frame, httpStatusCode);
 }
@@ -215,45 +207,4 @@ void BrowserHandler::CloseAllBrowsers(bool forceClose)
 	{
 		browser->GetHost()->CloseBrowser(forceClose);
 	}
-}
-
-bool BrowserHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message)
-{
-	if (message->GetName().compare(kMessageConfigure) == 0)
-	{
-		auto browserView = CefBrowserView::GetForBrowser(browser);
-		auto browserWindow = browserView->GetWindow();
-
-		auto configBinary = message->GetArgumentList()->GetBinary(kParamConfig);
-		if (configBinary && configBinary->GetData(&m_config, sizeof(m_config), 0) == sizeof(m_config))
-		{
-			browserWindow->SetFullscreen(m_config.fullscreenInitial);
-			PlatformUtils::AdjustWindowSize(browserWindow, m_config.sizeWidth, m_config.sizeHeight);
-			PlatformUtils::MakeWindowResizable(browserWindow, m_config.resizeEnabled);
-			PlatformUtils::SetWindowAllowedActions(browserWindow, m_config.maximizeEnabled, m_config.minimizeEnabled);
-
-			if (m_config.iconPath[0] != 0)
-			{
-				char iconUrl[128];
-
-				CefURLParts urlParts;
-				CefParseURL(m_config.iconPath, urlParts);
-
-				if (urlParts.scheme.length == 0)
-				{
-					strcpy(iconUrl, "content://./");
-					strcat(iconUrl, m_config.iconPath);
-				}
-				else
-				{
-					strncpy(iconUrl, m_config.iconPath, sizeof(iconUrl));
-				}
-
-				browser->GetHost()->DownloadImage(iconUrl, true, 16, true, new IconDownloadCallback(browser));
-			}
-		}
-
-		return true;
-	}
-	return CefClient::OnProcessMessageReceived(browser, source_process, message);
 }

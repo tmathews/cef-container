@@ -9,7 +9,5 @@ public:
 
 	static void SetWindowAllowedActions(CefRefPtr<CefWindow> window, bool maximizable, bool minimizable);
 
-	static void MakeWindowMinimizable(CefRefPtr<CefWindow> window, bool minimizable);
-
 	static void AdjustWindowSize(CefRefPtr<CefWindow> window, int contentWidth, int contentHeight);
 };

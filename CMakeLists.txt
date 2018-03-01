@@ -21,5 +21,5 @@ add_subdirectory(src ${CMAKE_SOURCE_DIR}/bin/cef-container)
 # Visual Studio IDE configuration
 if(MSVC_IDE)
 	set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cef-container)
-	set_property(TARGET cef-container PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
+	set_property(TARGET cef-container PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/cef-container/${CMAKE_CFG_INTDIR})
 endif()

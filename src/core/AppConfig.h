@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 struct AppConfig
 {
@@ -17,4 +18,7 @@ struct AppConfig
 	bool minimizeEnabled = true;
 	bool resizeEnabled = true;
 	bool contextmenuEnabled = false;
+	std::vector<std::string> archives;
 };
+
+bool LoadAppConfig(const char* fileName, AppConfig* config);

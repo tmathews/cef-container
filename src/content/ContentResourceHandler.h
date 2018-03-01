@@ -2,7 +2,7 @@
 
 #include <include/cef_scheme.h>
 
-#include <stdio.h>
+class IFileStream;
 
 class ContentResourceHandler : public CefResourceHandler
 {
@@ -10,7 +10,7 @@ class ContentResourceHandler : public CefResourceHandler
 	DISALLOW_COPY_AND_ASSIGN(ContentResourceHandler);
 
 public:
-	ContentResourceHandler(const std::string& mimeType, FILE* file, int size);
+	ContentResourceHandler(const std::string& mimeType, IFileStream* file, int size);
 	
 	~ContentResourceHandler();
 
@@ -24,6 +24,6 @@ public:
 
 private:
 	CefString m_mimeType;
-	FILE* m_file;
+	IFileStream* m_file;
 	int m_fileSize;
 };

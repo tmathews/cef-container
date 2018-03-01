@@ -10,15 +10,20 @@ set(SRCS
 	content/ContentHandlerFactory.cpp
 	content/ContentResourceHandler.h
 	content/ContentResourceHandler.cpp
+	content/io/Archive.h
+	content/io/FileStream.h
+	content/io/StandardIoArchive.h
+	content/io/StandardIoArchive.cpp
+	content/io/StandardIoFileStream.h
+	content/io/StandardIoFileStream.cpp
 	core/BrowserHandler.h
 	core/BrowserHandler.cpp
 	core/BrowserWindowDelegate.h
 	core/BrowserWindowDelegate.cpp
-	core/Messages.h
-	core/Messages.cpp
+	core/IconDownloadCallback.h
+	core/IconDownloadCallback.cpp
 	core/AppConfig.h
-	core/ConfigVisitor.h
-	core/ConfigVisitor.cpp
+	core/AppConfig.cpp
 	core/App.h
 	core/App.cpp
 	)
@@ -27,11 +32,13 @@ if(OS_WINDOWS)
 	set(SRCS ${SRCS}
 		MainWindows.cpp
 		platform/PlatformUtilsWindows.cpp
+		content/io/WindowsArchive.h
 		)
 elseif(OS_LINUX)
 	set(SRCS ${SRCS}
 		MainWindows.cpp
 		platform/PlatformUtilsLinux.cpp
+		content/io/LinuxArchive.h
 		)
 endif()
 
@@ -77,4 +84,8 @@ endif()
 add_custom_command(
 	TARGET ${CEF_TARGET} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/content $<TARGET_FILE_DIR:${CEF_TARGET}>/content
+	)
+add_custom_command(
+	TARGET ${CEF_TARGET} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/config.default.json $<TARGET_FILE_DIR:${CEF_TARGET}>
 	)

@@ -1,13 +1,18 @@
 #include "ContentHandlerFactory.h"
 #include "ContentResourceHandler.h"
 
+#include "io/Archive.h"
+#include "io/FileStream.h"
+
 #include <include/cef_parser.h>
 #include <include/wrapper/cef_helpers.h>
 
+#include <algorithm>
+
 inline std::string GetFileExtension(const std::string& fileName)
 {
-	auto dotPos = fileName.find_last_of('.');
-	return dotPos != std::string::npos ? fileName.substr(dotPos + 1) : "";
+	auto dot = fileName.find_last_of('.');
+	return dot != std::string::npos ? fileName.substr(dot + 1) : "";
 }
 
 CefRefPtr<CefResourceHandler> ContentHandlerFactory::Create(
@@ -27,18 +32,18 @@ CefRefPtr<CefResourceHandler> ContentHandlerFactory::Create(
 		return nullptr;
 	}
 
-	CefString pathTmp;
-	pathTmp.FromString(urlParts.path.str, urlParts.path.length, true);
-	pathTmp = CefURIDecode(pathTmp, true, (cef_uri_unescape_rule_t)(UU_NORMAL | UU_SPACES));
+	CefString temporaryPath;
+	temporaryPath.FromString(urlParts.path.str, urlParts.path.length, true);
+	temporaryPath = CefURIDecode(temporaryPath, true, (cef_uri_unescape_rule_t)(UU_NORMAL | UU_SPACES));
 
-	if (pathTmp.empty())
+	if (temporaryPath.empty())
 	{
 		return nullptr;
 	}
 
-	std::string path = pathTmp.ToString();
+	std::string path = temporaryPath.ToString();
 
-	pathTmp.ClearAndFree();
+	temporaryPath.ClearAndFree();
 
 	if (path.back() == '/' || path.back() == '\\')
 	{
@@ -61,23 +66,30 @@ CefRefPtr<CefResourceHandler> ContentHandlerFactory::Create(
 		}
 	}
 
-	auto fileName = std::string("./content") + path;
-
-	auto file = fopen(fileName.c_str(), "rb");
-	if (!file)
+	for (auto it = m_archives.rbegin(); it != m_archives.rend(); ++it)
 	{
-		return nullptr;
+		auto archive = *it;
+
+		auto file = archive->Open(path);
+		if (!file)
+		{
+			continue;
+		}
+		
+		file->Seek(IoSeekOrigin::End);
+		auto fileSize = file->Tell();
+		file->Seek(IoSeekOrigin::Start);
+		
+		return new ContentResourceHandler(mimeType, file, fileSize);
 	}
 
-	fseek(file, 0, SEEK_END);
-	auto fileSize = ftell(file);
-	fseek(file, 0, SEEK_SET);
+	return nullptr;
+}
 
-	if (fileSize == 0)
+void ContentHandlerFactory::MountArchive(CefRefPtr<IArchive> archive)
+{
+	if (std::find(m_archives.begin(), m_archives.end(), archive) == m_archives.end())
 	{
-		fclose(file);
-		return nullptr;
+		m_archives.push_back(archive);
 	}
-
-	return new ContentResourceHandler(mimeType, file, fileSize);
 }
