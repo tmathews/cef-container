@@ -28,6 +28,6 @@ cmake ../
 Or use the scripts:
 ```sh
 cd scripts
-./build-linux.sh
-./run-linux.sh
+./build.sh
+./run.sh
 ```
