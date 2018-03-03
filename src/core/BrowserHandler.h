@@ -5,6 +5,8 @@
 #include <include/cef_client.h>
 #include <vector>
 
+class App;
+
 class BrowserHandler :
 	public CefClient,
 	public CefDisplayHandler,
@@ -16,7 +18,7 @@ class BrowserHandler :
 	IMPLEMENT_REFCOUNTING(BrowserHandler);
 
 public:
-	explicit BrowserHandler(const AppConfig& config);
+	BrowserHandler(App* app, const AppConfig& config);
 	
 	~BrowserHandler();
 
@@ -48,12 +50,15 @@ public:
 
 	virtual bool OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event, CefEventHandle os_event) override;
 
+	virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message) override;
+
 	void CloseAllBrowsers(bool forceClose);
 
 	bool IsClosing() const { return m_isClosing; }
 
 private:
-	const AppConfig& m_config;
+	App* m_app;
+	AppConfig m_config;
 	bool m_isClosing;
 	std::vector<CefRefPtr<CefBrowser>> m_browsers;
 };

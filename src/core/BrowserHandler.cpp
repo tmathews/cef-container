@@ -1,6 +1,7 @@
 #include "BrowserHandler.h"
 #include "AppConfig.h"
 #include "IconDownloadCallback.h"
+#include "App.h"
 
 #include "platform/PlatformUtils.h"
 
@@ -18,8 +19,9 @@ BrowserHandler* BrowserHandler::Get()
 	return s_instance;
 }
 
-BrowserHandler::BrowserHandler(const AppConfig& config)
-	: m_config(config)
+BrowserHandler::BrowserHandler(App* app, const AppConfig& config)
+	: m_app(app)
+	, m_config(config)
 {
 	s_instance = this;
 }
@@ -208,3 +210,16 @@ void BrowserHandler::CloseAllBrowsers(bool forceClose)
 		browser->GetHost()->CloseBrowser(forceClose);
 	}
 }
+
+bool BrowserHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message)
+{
+	if (message->GetName() == "task_launch_container")
+	{
+		AppConfig config;
+		message->GetArgumentList()->GetBinary(0)->GetData(&config, sizeof(AppConfig), 0);
+		CefRefPtr<App::LaunchContainerTask> task(new App::LaunchContainerTask(m_app, config));
+		return CefPostTask(TID_UI, task);
+	}
+	return false;
+}
+

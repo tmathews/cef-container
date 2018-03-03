@@ -19,7 +19,7 @@
   },
   "content": {
     "archives": [
-      "./content/"
+      "../../../content/"
     ]
   }
 }

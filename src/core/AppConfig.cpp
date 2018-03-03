@@ -51,9 +51,9 @@ bool LoadAppConfig(const char* fileName, AppConfig* config)
 	config->exitEsc = document["exit"]["esc"].GetBool();
 
 	auto archivesArray = document["content"]["archives"].GetArray();
-	for (auto it = archivesArray.Begin(); it != archivesArray.End(); ++it)
+	for (auto it = archivesArray.Begin(); it != archivesArray.End() && config->numArchives < MAX_ARCHIVES; ++it)
 	{
-		config->archives.push_back(it->GetString());
+		strncpy(config->archives[config->numArchives++], it->GetString(), sizeof(config->archives[0]));
 	}
 
 	fclose(file);

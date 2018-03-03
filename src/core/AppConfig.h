@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#define MAX_ARCHIVES 64
+
 struct AppConfig
 {
 	char iconPath[128] = { 0 };
@@ -18,7 +20,8 @@ struct AppConfig
 	bool minimizeEnabled = true;
 	bool resizeEnabled = true;
 	bool contextmenuEnabled = false;
-	std::vector<std::string> archives;
+	char archives[MAX_ARCHIVES][128];
+	int numArchives = 0;
 };
 
 bool LoadAppConfig(const char* fileName, AppConfig* config);

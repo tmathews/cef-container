@@ -26,6 +26,8 @@ set(SRCS
 	core/AppConfig.cpp
 	core/App.h
 	core/App.cpp
+	core/js/JSContainer.h
+	core/js/JSContainer.cpp
 	)
 
 if(OS_WINDOWS)
